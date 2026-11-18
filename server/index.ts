@@ -20,7 +20,7 @@ const DATA_DIR = join(__dirname, '..', 'data')
 // Keys from environment variables (.env file) - used as defaults
 const ENV_CLAUDE_KEY = process.env.CLAUDE_API_KEY || ''
 const ENV_OPENAI_KEY = process.env.OPENAI_API_KEY || ''
-const ENV_CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514'
+const ENV_CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929'
 
 const DEFAULT_SETTINGS: AppSettings = {
   claudeApiKey: ENV_CLAUDE_KEY,
