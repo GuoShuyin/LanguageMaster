@@ -1,4 +1,5 @@
 import type { ProcessResult } from '../../shared/types'
+import { stripFurigana } from '../../src/shared/furigana'
 
 interface ClaudeConfig {
   apiKey: string
@@ -48,14 +49,40 @@ async function processChunk(
   translate: boolean,
   furigana: boolean
 ): Promise<ProcessResult[]> {
+  const results = await requestChunk(chunk, config, translate, furigana)
+  if (!furigana) return results
+
+  const norm = (t: string) => t.replace(/\s+/g, '')
+  const isValid = (r: ProcessResult, i: number) =>
+    !r.furigana || norm(stripFurigana(r.furigana)) === norm(chunk[i].japanese)
+  const badIdx = results.map((r, i) => (isValid(r, i) ? -1 : i)).filter((i) => i >= 0)
+  if (badIdx.length === 0) return results
+
+  const retried = await requestChunk(badIdx.map((i) => chunk[i]), config, false, true).catch(() => [])
+  retried.forEach((r, j) => {
+    const i = badIdx[j]
+    if (r.furigana && isValid(r, i)) results[i] = { ...results[i], furigana: r.furigana }
+  })
+  return results
+}
+
+async function requestChunk(
+  chunk: BatchItem[],
+  config: ClaudeConfig,
+  translate: boolean,
+  furigana: boolean
+): Promise<ProcessResult[]> {
   const linesText = chunk.map((item) => `${item.id}: ${item.japanese}`).join('\n')
 
   const tasks: string[] = []
   if (furigana) {
     tasks.push(
-      '"furigana": the Japanese text with kanji readings annotated using the format 漢字[かんじ]. ' +
-        'Only add readings for kanji (and kanji compounds). Leave kana and punctuation as-is. ' +
-        'Example: 私[わたし]は日本語[にほんご]を勉強[べんきょう]します。'
+      '"furigana": the original line with kanji readings annotated using the format 漢字[かんじ]. Rules: ' +
+        '(1) annotate each kanji word separately, with the reading in brackets immediately after its kanji; ' +
+        '(2) the part before "[" must be kanji only — okurigana and other kana stay outside the brackets, e.g. 楽[たの]しく not 楽し[たのし]く, 合[あ]った not 合った[あった]; ' +
+        '(3) the reading must be hiragana; ' +
+        '(4) do NOT alter, add, or remove any character of the original line (keep punctuation, spaces and symbols exactly) — removing the [readings] must give back the original line exactly. ' +
+        'Example: 気[き]の合[あ]った友達[ともだち]とでなくちゃ楽[たの]しくやれないよ'
     )
   }
   if (translate) {

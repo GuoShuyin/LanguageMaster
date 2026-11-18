@@ -1,6 +1,6 @@
 import React from 'react'
 import type { ReviewItem } from '../shared/types'
-import { stripFurigana } from './FuriganaText'
+import { readingForSelection } from '../shared/furigana'
 
 interface ReviewBookModalProps {
   items: ReviewItem[]
@@ -17,20 +17,8 @@ export const ReviewBookModal: React.FC<ReviewBookModalProps> = ({
   onExportAnki,
   onClose
 }) => {
-  const getReading = (item: ReviewItem): string => {
-    if (!item.furigana) return ''
-    // Extract readings from furigana for the selected text
-    const plain = stripFurigana(item.furigana)
-    if (plain.includes(item.text)) {
-      // Find the reading for the selected text within the furigana
-      const regex = new RegExp(
-        item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\[([^\\]]+)\\]'
-      )
-      const match = item.furigana.match(regex)
-      if (match) return match[1]
-    }
-    return ''
-  }
+  const getReading = (item: ReviewItem): string =>
+    item.furigana ? readingForSelection(item.furigana, item.text) : ''
 
   return (
     <div className="modal-overlay" onClick={onClose}>

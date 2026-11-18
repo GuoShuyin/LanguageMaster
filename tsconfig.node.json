@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "skipLibCheck": true,
+    "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
@@ -9,5 +10,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["server/**/*", "shared/**/*", "vite.config.ts"]
+  "include": ["server/**/*", "shared/**/*", "src/shared/**/*", "vite.config.ts"]
 }
