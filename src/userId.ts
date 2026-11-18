@@ -11,8 +11,14 @@ export function getUserId(): string {
 }
 
 // Use instead of window.fetch for all /api calls.
-export function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+// A 402 response (weekly usage limit) also fires a global `lm:usage-limit` event for the upgrade prompt.
+export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers)
   headers.set('X-User-Id', getUserId())
-  return fetch(input, { ...init, headers })
+  const res = await fetch(input, { ...init, headers })
+  if (res.status === 402) {
+    const detail = await res.clone().json().catch(() => ({}))
+    window.dispatchEvent(new CustomEvent('lm:usage-limit', { detail }))
+  }
+  return res
 }

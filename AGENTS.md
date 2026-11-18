@@ -40,6 +40,9 @@ npm run typecheck  # 类型检查
 - **后端路由**：每个功能写一个 Express Router，在 `server/index.ts` 里用 `app.use('/api/<feature>', router)` 挂载。
 - **用量计费**：所有耗资源的处理，调用前都要先调 `server/usage.ts` 里的 `consumeCredits(userId, { kind, durationSec, videoKey })`；命中缓存时不调用。超出额度会抛出 `UsageLimitError`（HTTP 402）。
 - **新手引导**：需要被引导的关键元素加上 `data-tour="..."` 属性。
+- **视频标识**：`src/shared/videoKey.ts` 的 `parseVideoUrl(url)` 返回 `{ platform, id, key, url }`。`key`（如 `youtube:<id>`、`bilibili:<BV>`）是字幕缓存和社区帖子共用的唯一键。前后端都从这里导入。
+- **母语 / 翻译目标语言**：语言列表在 `src/shared/languages.ts`（`languageName(code)` 得到给 Claude 用的语言名）。客户端用 `src/locale.ts` 的 `getTargetLanguage()` 读取，并把 `targetLanguage`（语言代码）随处理请求发给后端；`processSubtitlesWithClaude` 接受 `options.targetLanguage`（语言名）。
+- **用量超限**：`apiFetch` 收到 402 时会触发全局 `lm:usage-limit` 事件，由收费功能负责弹出升级提示。
 - **字幕翻译字段**：`SubtitleSegment.chinese` 目前表示"用户母语的翻译"（历史原因沿用这个字段名）。
 - **端口**：`PORT`（后端，默认 3001）和 `WEB_PORT`（前端，默认 5173）可以通过环境变量覆盖。
 - **测试**：Playwright 脚本放在 `test-videos/`，用 `npx tsx test-videos/<file>.ts` 运行。
