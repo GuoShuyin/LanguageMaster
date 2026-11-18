@@ -33,6 +33,62 @@ body {
   flex-direction: column;
 }
 
+/* ===== Global nav ===== */
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.navbar-brand {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 16px;
+}
+
+.navbar-item {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.navbar-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.navbar-item.active {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.navbar-spacer {
+  flex: 1;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* ===== Toolbar ===== */
 .toolbar {
   display: flex;

@@ -31,6 +31,19 @@ npm run typecheck  # 类型检查
 7. 在字幕栏框选文字，自动加入复习本
 8. 点击 📖复习本，查看/导出 Anki 卡片
 
+## 架构约定（多个功能并行开发时必须遵守）
+
+- **页面路由**：hash 路由，见 `src/router.ts`（`#/local`、`#/watch?url=...`、`#/community`、`#/pricing`）。`src/App.tsx` 只负责切换页面，每个页面放在 `src/pages/`。
+- **导航栏**：`src/components/NavBar.tsx`，右侧 `#navbar-right` 区域放用量显示和设置按钮。
+- **数据库**：SQLite（better-sqlite3），共享连接在 `server/db.ts`。每个功能模块在自己的文件里用 `CREATE TABLE IF NOT EXISTS` 建表，表名带功能前缀（`billing_*`、`community_*`、`videos_*`、`user_*`）。
+- **用户身份（上线前）**：客户端在 `src/userId.ts` 生成匿名 ID，所有 `/api` 请求都通过 `apiFetch` / `fetchJSON` 发送，带 `X-User-Id` 请求头。服务端由 `server/user.ts` 中间件写入 `req.userId`。
+- **后端路由**：每个功能写一个 Express Router，在 `server/index.ts` 里用 `app.use('/api/<feature>', router)` 挂载。
+- **用量计费**：所有耗资源的处理，调用前都要先调 `server/usage.ts` 里的 `consumeCredits(userId, { kind, durationSec, videoKey })`；命中缓存时不调用。超出额度会抛出 `UsageLimitError`（HTTP 402）。
+- **新手引导**：需要被引导的关键元素加上 `data-tour="..."` 属性。
+- **字幕翻译字段**：`SubtitleSegment.chinese` 目前表示"用户母语的翻译"（历史原因沿用这个字段名）。
+- **端口**：`PORT`（后端，默认 3001）和 `WEB_PORT`（前端，默认 5173）可以通过环境变量覆盖。
+- **测试**：Playwright 脚本放在 `test-videos/`，用 `npx tsx test-videos/<file>.ts` 运行。
+
 ## API Keys
 
 - **Claude API Key**: https://console.anthropic.com (用于翻译+注音)

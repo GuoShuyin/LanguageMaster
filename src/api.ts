@@ -1,9 +1,10 @@
 import type { AppSettings, ReviewItem, SubtitleSegment, ProcessResult } from './shared/types'
+import { apiFetch } from './userId'
 
 const API_BASE = '/api'
 
-async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
+export async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
+  const response = await apiFetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export const api = {
     const formData = new FormData()
     formData.append('video', videoFile)
     formData.append('settings', JSON.stringify(settings))
-    const response = await fetch(`${API_BASE}/whisper/transcribe`, {
+    const response = await apiFetch(`${API_BASE}/whisper/transcribe`, {
       method: 'POST',
       body: formData
     })
@@ -100,7 +101,7 @@ export const api = {
 
   // Anki export - triggers browser download
   exportAnki: async (items: ReviewItem[]): Promise<void> => {
-    const response = await fetch(`${API_BASE}/anki/export`, {
+    const response = await apiFetch(`${API_BASE}/anki/export`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(items)

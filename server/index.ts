@@ -11,11 +11,12 @@ import { parseSubtitles, isJapanese } from './services/subtitles'
 import { processSubtitlesWithClaude } from './services/claude'
 import { transcribeWithWhisper } from './services/asr'
 import { generateAnkiTSV } from './services/anki'
+import { DATA_DIR } from './db'
+import { userMiddleware } from './user'
 
 dotenv.config()
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DATA_DIR = join(__dirname, '..', 'data')
 
 // Keys from environment variables (.env file) - used as defaults
 const ENV_CLAUDE_KEY = process.env.CLAUDE_API_KEY || ''
@@ -79,6 +80,9 @@ async function saveReviewBook(items: ReviewItem[]): Promise<void> {
 const app = express()
 app.use(cors())
 app.use(express.json({ limit: '500mb' }))
+app.use('/api', userMiddleware)
+
+// Feature routers are mounted here, e.g. app.use('/api/billing', billingRouter)
 
 // Serve static files in production
 const distDir = join(__dirname, '..', 'dist')
