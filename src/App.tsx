@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import type { AppSettings, ReviewItem, SubtitleSegment } from '../shared/types'
+import type { AppSettings, ReviewItem, SubtitleSegment } from './shared/types'
 import { api } from './api'
 import { FuriganaText, stripFurigana } from './components/FuriganaText'
 import SettingsModal from './components/SettingsModal'

@@ -30,3 +30,7 @@ npm-debug.log*
 test-videos/*.mp4
 test-videos/*.vtt
 test-videos/*.srt
+
+# Test artifacts
+test-results/
+test-videos/screenshots/

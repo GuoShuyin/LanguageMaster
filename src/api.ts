@@ -1,4 +1,4 @@
-import type { AppSettings, ReviewItem, SubtitleSegment, ProcessResult } from '../shared/types'
+import type { AppSettings, ReviewItem, SubtitleSegment, ProcessResult } from './shared/types'
 
 const API_BASE = '/api'
 

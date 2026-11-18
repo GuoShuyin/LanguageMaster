@@ -1,5 +1,5 @@
 import React from 'react'
-import type { ReviewItem } from '../../shared/types'
+import type { ReviewItem } from '../shared/types'
 import { stripFurigana } from './FuriganaText'
 
 interface ReviewBookModalProps {

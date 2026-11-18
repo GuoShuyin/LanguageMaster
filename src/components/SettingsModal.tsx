@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { AppSettings } from '../../shared/types'
+import type { AppSettings } from '../shared/types'
 
 interface SettingsModalProps {
   settings: AppSettings
