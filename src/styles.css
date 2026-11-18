@@ -151,6 +151,7 @@ body {
   max-height: 220px;
   overflow-y: auto;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .subtitle-bar-empty {
@@ -166,6 +167,7 @@ body {
   margin-bottom: 8px;
   cursor: text;
   user-select: text;
+  text-align: center;
 }
 
 .subtitle-japanese ruby {
@@ -186,6 +188,7 @@ body {
   color: var(--text-secondary);
   cursor: text;
   user-select: text;
+  text-align: center;
 }
 
 .subtitle-hint {
