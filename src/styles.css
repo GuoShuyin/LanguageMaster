@@ -228,6 +228,7 @@ body {
 
 .subtitle-japanese ruby {
   ruby-position: over;
+  margin: 0 0.08em;
 }
 
 .subtitle-japanese rt {

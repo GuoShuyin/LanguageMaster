@@ -23,3 +23,6 @@ export function estimateCredits(_req: UsageRequest): number {
 // Throws UsageLimitError if the user's weekly allowance would be exceeded.
 // Call BEFORE doing expensive work; do not call for cache hits.
 export async function consumeCredits(_userId: string, _req: UsageRequest): Promise<void> {}
+
+// Give credits back when processing failed after consumeCredits succeeded.
+export async function refundCredits(_userId: string, _req: UsageRequest): Promise<void> {}

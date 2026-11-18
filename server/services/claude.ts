@@ -18,9 +18,10 @@ interface BatchItem {
 export async function processSubtitlesWithClaude(
   items: BatchItem[],
   config: ClaudeConfig,
-  options: { translate: boolean; furigana: boolean }
+  options: { translate: boolean; furigana: boolean; targetLanguage?: string }
 ): Promise<ProcessResult[]> {
   const { translate, furigana } = options
+  const target = options.targetLanguage || 'Simplified Chinese'
   const results: ProcessResult[] = []
 
   // Process in chunks to avoid too-large requests
@@ -34,7 +35,9 @@ export async function processSubtitlesWithClaude(
   const MAX_CONCURRENT = 3
   for (let i = 0; i < chunks.length; i += MAX_CONCURRENT) {
     const batch = chunks.slice(i, i + MAX_CONCURRENT)
-    const batchResults = await Promise.all(batch.map((chunk) => processChunk(chunk, config, translate, furigana)))
+    const batchResults = await Promise.all(
+      batch.map((chunk) => processChunk(chunk, config, translate, furigana, target))
+    )
     for (const chunkResult of batchResults) {
       results.push(...chunkResult)
     }
@@ -47,9 +50,10 @@ async function processChunk(
   chunk: BatchItem[],
   config: ClaudeConfig,
   translate: boolean,
-  furigana: boolean
+  furigana: boolean,
+  target: string
 ): Promise<ProcessResult[]> {
-  const results = await requestChunk(chunk, config, translate, furigana)
+  const results = await requestChunk(chunk, config, translate, furigana, target)
   if (!furigana) return results
 
   const norm = (t: string) => t.replace(/\s+/g, '')
@@ -58,7 +62,9 @@ async function processChunk(
   const badIdx = results.map((r, i) => (isValid(r, i) ? -1 : i)).filter((i) => i >= 0)
   if (badIdx.length === 0) return results
 
-  const retried = await requestChunk(badIdx.map((i) => chunk[i]), config, false, true).catch(() => [])
+  const retried = await requestChunk(badIdx.map((i) => chunk[i]), config, false, true, target).catch(
+    () => []
+  )
   retried.forEach((r, j) => {
     const i = badIdx[j]
     if (r.furigana && isValid(r, i)) results[i] = { ...results[i], furigana: r.furigana }
@@ -70,7 +76,8 @@ async function requestChunk(
   chunk: BatchItem[],
   config: ClaudeConfig,
   translate: boolean,
-  furigana: boolean
+  furigana: boolean,
+  target: string
 ): Promise<ProcessResult[]> {
   const linesText = chunk.map((item) => `${item.id}: ${item.japanese}`).join('\n')
 
@@ -86,11 +93,11 @@ async function requestChunk(
     )
   }
   if (translate) {
-    tasks.push('"chinese": a natural Chinese (Simplified) translation of the Japanese line')
+    // Field is named "chinese" for historical reasons; it holds the translation in the target language.
+    tasks.push(`"chinese": a natural ${target} translation of the Japanese line`)
   }
 
-  const systemPrompt =
-    'You are a Japanese language assistant. You help language learners by annotating Japanese text with furigana readings and providing Chinese translations. You return only valid JSON.'
+  const systemPrompt = `You are a Japanese language assistant. You help language learners by annotating Japanese text with furigana readings and providing ${target} translations. You return only valid JSON.`
 
   const userPrompt = `For each Japanese subtitle line below, provide ${tasks.join(' and ')}.
 
