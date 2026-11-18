@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Environment (contains secrets - never commit)
+.env
+.env.local
+
+# Data files (settings, review book)
+data/
+
+# OS files
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*

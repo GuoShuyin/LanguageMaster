@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
+import dotenv from 'dotenv'
 import { readFile, writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -11,13 +12,20 @@ import { processSubtitlesWithClaude } from './services/claude'
 import { transcribeWithWhisper } from './services/asr'
 import { generateAnkiTSV } from './services/anki'
 
+dotenv.config()
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, '..', 'data')
 
+// Keys from environment variables (.env file) - used as defaults
+const ENV_CLAUDE_KEY = process.env.CLAUDE_API_KEY || ''
+const ENV_OPENAI_KEY = process.env.OPENAI_API_KEY || ''
+const ENV_CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514'
+
 const DEFAULT_SETTINGS: AppSettings = {
-  claudeApiKey: '',
-  openaiApiKey: '',
-  claudeModel: 'claude-sonnet-4-20250514',
+  claudeApiKey: ENV_CLAUDE_KEY,
+  openaiApiKey: ENV_OPENAI_KEY,
+  claudeModel: ENV_CLAUDE_MODEL,
   showJapanese: true,
   showChinese: true,
   showFurigana: true
@@ -32,7 +40,15 @@ async function ensureDataDir(): Promise<void> {
 async function loadSettings(): Promise<AppSettings> {
   try {
     const content = await readFile(join(DATA_DIR, 'settings.json'), 'utf-8')
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(content) }
+    const saved = JSON.parse(content)
+    // Environment variables take precedence for API keys (if set in .env)
+    return {
+      ...DEFAULT_SETTINGS,
+      ...saved,
+      claudeApiKey: ENV_CLAUDE_KEY || saved.claudeApiKey || '',
+      openaiApiKey: ENV_OPENAI_KEY || saved.openaiApiKey || '',
+      claudeModel: ENV_CLAUDE_MODEL || saved.claudeModel || ENV_CLAUDE_MODEL
+    }
   } catch {
     return { ...DEFAULT_SETTINGS }
   }
@@ -203,7 +219,7 @@ if (existsSync(distDir)) {
   })
 }
 
-const PORT = 3001
+const PORT = parseInt(process.env.PORT || '3001', 10)
 app.listen(PORT, () => {
   console.log(`LanguageMaster server running at http://localhost:${PORT}`)
   ensureDataDir()
